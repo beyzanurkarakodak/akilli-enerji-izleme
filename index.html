@@ -3,68 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Güneş Paneli Verimlilik Analizi</title>
+    <title>☀️ Akıllı Enerji İzleme</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background: #f0f2f5; color: #1c1e21; margin: 0; padding: 20px; }
-        .card { background: white; padding: 30px; margin: 40px auto; max-width: 400px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); border-top: 8px solid #3498db; transition: all 0.3s ease; }
-        .status-normal { color: #2ecc71; font-weight: bold; font-size: 1.4em; }
-        .status-alert { color: #e74c3c; font-weight: bold; font-size: 1.4em; }
-        h1 { color: #2c3e50; font-size: 1.8em; }
-        hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
-        .refresh-text { font-size: 0.8em; color: #95a5a6; margin-top: 15px; }
+        body { font-family: 'Segoe UI', sans-serif; text-align: center; background: #f8f9fa; padding: 40px; margin: 0; }
+        .card { background: white; padding: 40px; border-radius: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); display: inline-block; min-width: 320px; border-top: 12px solid #3498db; transition: 0.3s; }
+        .val { font-size: 3.5em; font-weight: 800; margin: 15px 0; color: #2c3e50; }
+        .status { font-size: 1.4em; font-weight: bold; padding: 10px 25px; border-radius: 50px; text-transform: uppercase; }
+        .NORMAL { background: #d4edda; color: #155724; }
+        .ARIZA { background: #f8d7da; color: #721c24; }
+        h1 { color: #34495e; margin-bottom: 30px; }
+        .time { color: #95a5a6; margin-top: 20px; font-size: 0.9em; }
     </style>
 </head>
 <body>
-    <h1>☀️ Akıllı Enerji İzleme Sistemi</h1>
-    <div id="data-container">
-        <div class="card">🔄 Veriler Supabase Bulutundan Çekiliyor...</div>
+    <h1>☀️ Güneş Paneli Verimlilik Analizi</h1>
+    <div class="card" id="mainCard">
+        <h2 id="title">Veriler Çekiliyor...</h2>
+        <div id="content"></div>
+        <div id="time" class="time"></div>
     </div>
 
     <script>
-        // SADECE BU İKİSİNİ KONTROL ET (Resimdekiyle Birebir Aynı)
-        const URL = "https://fpksboxxaxyyinvttamp.supabase.co/rest/v1/panel_verileri?select=*&order=id.desc&limit=1";
-        const KEY = "sb_publishable_3tnbrWsfMEO77J9APn2fA_kDYNgku5"; 
+        // SENİN VERDİĞİN ANAHTARI VE URL'Yİ BURAYA YERLEŞTİRDİM
+        const SB_URL = "https://fpksboxxaxyyinvttamp.supabase.co/rest/v1/panel_verileri?select=*&order=id.desc&limit=1";
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZwa3Nib3h4YXh5eWludnR0YW1wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNDk5OTUsImV4cCI6MjA5MDcyNTk5NX0.PRYzjXN8NEFSjee7X9vAgjb1APcKZ2DfH2MGnVgFP4w";
 
-        async function veriCek() {
+        async function update() {
             try {
-                const res = await fetch(URL, {
-                    headers: { "apikey": KEY, "Authorization": "Bearer " + KEY }
+                const res = await fetch(SB_URL, {
+                    headers: { 
+                        "apikey": SB_KEY, 
+                        "Authorization": "Bearer " + SB_KEY 
+                    }
                 });
                 
-                if (!res.ok) throw new Error("Hata Kodu: " + res.status);
+                if (!res.ok) throw new Error("Hata: " + res.status);
                 
                 const data = await res.json();
-                if (data.length === 0) throw new Error("Veri bulunamadı.");
+                const last = data[0];
 
-                const son = data[0];
-                const isNormal = son.durum.includes("NORMAL");
+                const isNormal = last.durum.includes("NORMAL");
 
-                document.getElementById('data-container').innerHTML = `
-                    <div class="card" style="border-top-color: ${isNormal ? '#2ecc71' : '#e74c3c'}">
-                        <p style="font-size: 0.9em; color: #7f8c8d; margin-bottom: 5px;">Panel ID: #${son.id}</p>
-                        <h2 style="margin: 10px 0;">Işık Şiddeti: %${son.isik_seviyesi}</h2>
-                        <div class="${isNormal ? 'status-normal' : 'status-alert'}">
-                            ${isNormal ? '✅ SİSTEM NORMAL' : '⚠️ ARIZA TESPİT EDİLDİ'}
-                        </div>
-                        <p>Akım Üretimi: <b>${son.uretim_amper}A</b></p>
-                        <hr>
-                        <p style="font-size: 0.85em; color: #34495e;">${son.durum}</p>
-                        <div class="refresh-text">Son Güncelleme: ${new Date(son.created_at).toLocaleString('tr-TR')}</div>
+                document.getElementById('title').innerText = "Güncel Panel Durumu";
+                document.getElementById('content').innerHTML = `
+                    <div class="val">%${last.isik_seviyesi}</div>
+                    <div class="status ${isNormal ? 'NORMAL' : 'ARIZA'}">
+                        ${isNormal ? '✅ SİSTEM NORMAL' : '⚠️ ARIZA TESPİTİ'}
                     </div>
+                    <p style="margin-top:15px;">Akım Üretimi: <b>${last.uretim_amper}A</b></p>
                 `;
-            } catch (err) {
-                document.getElementById('data-container').innerHTML = `
-                    <div class="card" style="border-top-color: #e74c3c">
-                        <h3 style="color: #e74c3c">⚠️ Bağlantı Hatası</h3>
-                        <p>${err.message}</p>
-                        <small>Lütfen Supabase API Key'i ve Tablo İzinlerini Kontrol Edin.</small>
-                    </div>
-                `;
+                document.getElementById('time').innerText = "Son Veri: " + new Date(last.created_at).toLocaleString('tr-TR');
+                document.getElementById('mainCard').style.borderTopColor = isNormal ? "#2ecc71" : "#e74c3c";
+            } catch (e) {
+                document.getElementById('title').innerText = "Bağlantı Sorunu";
+                document.getElementById('content').innerHTML = "Lütfen sayfayı yenileyin veya internetinizi kontrol edin.";
+                console.error(e);
             }
         }
 
-        setInterval(veriCek, 5000); // 5 saniyede bir otomatik yenile
-        veriCek();
+        setInterval(update, 5000); // 5 saniyede bir güncelle
+        update();
     </script>
 </body>
 </html>
