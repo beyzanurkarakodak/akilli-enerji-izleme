@@ -4,15 +4,18 @@
     <meta charset="UTF-8">
     <title>Güneş Paneli Verimlilik Analizi</title>
     <style>
-        body { font-family: sans-serif; text-align: center; background: #f4f4f4; }
-        .card { background: white; padding: 20px; margin: 20px auto; width: 300px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        .status-normal { color: green; font-weight: bold; }
-        .status-alert { color: red; font-weight: bold; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background: #ececec; color: #333; }
+        .card { background: white; padding: 30px; margin: 50px auto; width: 350px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-top: 5px solid #f39c12; }
+        .status-normal { color: #27ae60; font-weight: bold; font-size: 1.2em; }
+        .status-alert { color: #e74c3c; font-weight: bold; font-size: 1.2em; }
+        h1 { margin-top: 50px; color: #2c3e50; }
     </style>
 </head>
 <body>
-    <h1>Canlı Panel İzleme Sistemi</h1>
-    <div id="data-container">Veriler yükleniyor...</div>
+    <h1>☀️ Canlı Panel İzleme Sistemi</h1>
+    <div id="data-container">
+        <div class="card">Veriler Supabase'den çekiliyor...</div>
+    </div>
 
     <script>
         const SUPABASE_URL = "https://fpksboxxaxyyinvttamp.supabase.co/rest/v1/panel_verileri?select=*&order=id.desc&limit=1";
@@ -21,24 +24,38 @@
         async function verileriGetir() {
             try {
                 const response = await fetch(SUPABASE_URL, {
-                    headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY }
+                    method: 'GET',
+                    headers: { 
+                        "apikey": SUPABASE_KEY, 
+                        "Authorization": "Bearer " + SUPABASE_KEY,
+                        "Content-Type": "application/json"
+                    }
                 });
+                
+                if (!response.ok) throw new Error("Veri çekilemedi: " + response.status);
+                
                 const data = await response.json();
-                const sonVeri = data[0];
+                if (data.length === 0) {
+                    document.getElementById('data-container').innerHTML = '<div class="card">Henüz veri kaydı bulunamadı.</div>';
+                    return;
+                }
 
+                const sonVeri = data[0];
                 document.getElementById('data-container').innerHTML = `
-                    <div class="card">
-                        <h3>Işık Seviyesi: %${sonVeri.isik_seviyesi}</h3>
-                        <p>Durum: <span class="${sonVeri.durum === 'NORMAL' ? 'status-normal' : 'status-alert'}">${sonVeri.durum}</span></p>
-                        <small>Son Güncelleme: ${new Date(sonVeri.created_at).toLocaleString('tr-TR')}</small>
+                    <div class="card" style="border-top-color: ${sonVeri.durum === 'NORMAL' ? '#27ae60' : '#e74c3c'}">
+                        <h2>Işık Şiddeti: %${sonVeri.isik_seviyesi}</h2>
+                        <p>Analiz Durumu: <span class="${sonVeri.durum === 'NORMAL' ? 'status-normal' : 'status-alert'}">${sonVeri.durum}</span></p>
+                        <p style="font-size: 0.9em; color: #7f8c8d;">Akım Üretimi: ${sonVeri.uretim_amper}A</p>
+                        <hr>
+                        <small>🕒 Son Güncelleme: <br> ${new Date(sonVeri.created_at).toLocaleString('tr-TR')}</small>
                     </div>
                 `;
             } catch (error) {
-                console.error("Hata:", error);
+                document.getElementById('data-container').innerHTML = `<div class="card" style="border-top-color: red;">⚠️ Hata: ${error.message}</div>`;
             }
         }
 
-        setInterval(verileriGetir, 5000); // 5 saniyede bir güncelle
+        setInterval(verileriGetir, 5000);
         verileriGetir();
     </script>
 </body>
