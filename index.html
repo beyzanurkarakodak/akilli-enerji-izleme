@@ -1,64 +1,27 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Güneş Enerjisi İzleme</title>
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; text-align: center; background: #2c3e50; color: white; padding: 50px; }
-        .card { background: #34495e; padding: 30px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); display: inline-block; min-width: 300px; }
-        .data-box { font-size: 1.5em; margin: 15px; padding: 10px; border-bottom: 1px solid #7f8c8d; }
-    </style>
+    <title>Test Sayfası</title>
 </head>
 <body>
-    <div class="card">
-        <h1 id="durum">Yükleniyor...</h1>
-        <div class="data-box" id="isik">Işık: --</div>
-        <div class="data-box" id="akim">Akım: --</div>
-        <div class="data-box" id="yagmur">Yağış: --</div>
-    </div>
+    <h1>Proje Çalışıyor mu?</h1>
     <script>
-        // Tablonun adını ve URL yapısını belirledik
-        console.log("Script çalışıyor...");
-        const SB_BASE_URL = "https://fpksboxxaxyyinvttamp.supabase.co/rest/v1/panel_verileri";
-        const SB_QUERY = "?select=*&order=id.desc&limit=1";
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZwa3Nib3h4YXh5eWludnR0YW1wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNDk5OTUsImV4cCI6MjA5MDcyNTk5NX0.PRYzjXN8NEFSjee7X9vAgjb1APcKZ2DfH2MGnVgFP4w";
+        console.log("Script dosyası başarıyla tarayıcı tarafından okundu!");
         
-        async function fetchVeri() {
+        async function testFonksiyonu() {
+            console.log("Fonksiyon çalışmaya başladı...");
             try {
-                // Rastgele bir zaman damgası (t) ekleyerek tarayıcının eski veriyi göstermesini engelliyoruz
-                const url = `${SB_BASE_URL}${SB_QUERY}&t=${Date.now()}`;
-                
-                const res = await fetch(url, { 
-                    headers: { 
-                        "apikey": SB_KEY, 
-                        "Authorization": "Bearer " + SB_KEY,
-                        "Cache-Control": "no-cache" // Önbelleği tamamen devre dışı bırakır
-                    }
+                // Sadece URL'yi test ediyoruz
+                const response = await fetch("https://fpksboxxaxyyinvttamp.supabase.co/rest/v1/panel_verileri?limit=1", {
+                    headers: { "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZwa3Nib3h4YXh5eWludnR0YW1wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNDk5OTUsImV4cCI6MjA5MDcyNTk5NX0.PRYzjXN8NEFSjee7X9vAgjb1APcKZ2DfH2MGnVgFP4w" }
                 });
-                
-                const data = await res.json();
-                
-                if (data && data.length > 0) {
-                    const d = data[0];
-                    const durumEl = document.getElementById('durum');
-                    
-                    document.getElementById('durum').innerText = "Durum: " + d.durum;
-                    document.getElementById('isik').innerText = "Işık: %" + d.isik_seviyesi;
-                    // Akımı yuvarlayarak yazdırıyoruz
-                    document.getElementById('akim').innerText = "Akım: " + parseFloat(d.uretim_amper).toFixed(2) + "A";
-                    document.getElementById('yagmur').innerText = "Yağış: " + (d.yagis_durumu ? "VAR 🌧️" : "YOK ☀️");
-                    
-                    // Renk değişimi
-                    durumEl.style.color = (d.durum === "ARIZA") ? "#e74c3c" : "#2ecc71";
-                }
-            } catch(e) { 
-                console.error("Veri çekme hatası:", e); 
+                const data = await response.json();
+                console.log("Veritabanından gelen cevap:", data);
+            } catch (err) {
+                console.error("Hata oluştu:", err);
             }
         }
-        
-        // 3 saniyede bir güncelleme yapacak
-        setInterval(fetchVeri, 3000);
-        fetchVeri();
+        testFonksiyonu();
     </script>
 </body>
 </html>
