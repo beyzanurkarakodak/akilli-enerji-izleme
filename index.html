@@ -1,108 +1,61 @@
- <!DOCTYPE html>
-
+<!DOCTYPE html>
 <html lang="tr">
-
 <head>
-
     <meta charset="UTF-8">
-
     <title>Güneş Enerjisi İzleme</title>
-
     <style>
-
         body { font-family: 'Segoe UI', sans-serif; text-align: center; background: #2c3e50; color: white; padding: 50px; }
-
-        .card { background: #34495e; padding: 30px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); display: inline-block; }
-
+        .card { background: #34495e; padding: 30px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); display: inline-block; min-width: 350px; }
         .data-box { font-size: 1.5em; margin: 15px; padding: 10px; border-bottom: 1px solid #7f8c8d; }
-
     </style>
-
 </head>
-
 <body>
-
     <div class="card">
-
         <h1 id="durum">Yükleniyor...</h1>
-
         <div class="data-box" id="isik">Işık: --</div>
-
         <div class="data-box" id="akim">Akım: --</div>
-
         <div class="data-box" id="yagmur">Yağış: --</div>
-
     </div>
 
     <script>
+        // Tablo adın "panel_verileri" olduğu için URL'yi düzelttim
+        const URL = "https://fpksboxxaxyyinvttamp.supabase.co/rest/v1/panel_verileri?select=*&order=id.desc&limit=1";
+        const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZwa3Nib3h4YXh5eWludnR0YW1wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNDk5OTUsImV4cCI6MjA5MDcyNTk5NX0.PRYzjXN8NEFSjee7X9vAgjb1APcKZ2DfH2MGnVgFP4w";
 
-        // URL'ye sıralama (order) ve limit ekledik ki en son veri gelsin
-
-        const SB_URL = "https://fpksboxxaxyyinvttamp.supabase.co/rest/v1/panel_verileri?select=*&order=id.desc&limit=1";
-
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZwa3Nib3h4YXh5eWludnR0YW1wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNDk5OTUsImV4cCI6MjA5MDcyNTk5NX0.PRYzjXN8NEFSjee7X9vAgjb1APcKZ2DfH2MGnVgFP4w";
-
-        
-
-        async function fetchVeri() {
-
+        async function veriGetir() {
             try {
-
-                const res = await fetch(SB_URL, { 
-
-                    headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY }
-
+                console.log("Veri çekiliyor...");
+                const response = await fetch(URL, {
+                    headers: {
+                        "apikey": KEY,
+                        "Authorization": "Bearer " + KEY,
+                        "Content-Type": "application/json"
+                    }
                 });
 
-                const data = await res.json();
-
-                
-
-                // Veri geldiyse işlem yap
-
-                if (data && data.length > 0) {
-
-                    const d = data[0];
-
-                    const durumEl = document.getElementById('durum');
-
-                    
-
-                    // Önce veriyi al, sonra görselleştirmeyi yap
-
-                    document.getElementById('durum').innerText = "Durum: " + d.durum;
-
-                    document.getElementById('isik').innerText = "Işık: %" + d.isik_seviyesi;
-
-                    document.getElementById('akim').innerText = "Akım: " + d.uretim_amper.toFixed(2) + "A";
-
-                    document.getElementById('yagmur').innerText = "Yağış: " + (d.yagis_durumu ? "VAR 🌧️" : "YOK ☀️");
-
-                    
-
-                    // Renk değişimi veriyi aldıktan sonra
-
-                    durumEl.style.color = (d.durum === "ARIZA") ? "#e74c3c" : "#2ecc71";
-
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error('Hata ' + response.status + ': ' + errorText);
                 }
 
-            } catch(e) { 
-
-                console.error("Veri çekme hatası:", e); 
-
+                const data = await response.json();
+                console.log("Gelen veri:", data);
+                
+                if (data.length > 0) {
+                    const d = data[0];
+                    document.getElementById('durum').innerText = "Durum: " + d.durum;
+                    document.getElementById('isik').innerText = "Işık: %" + d.isik_seviyesi;
+                    document.getElementById('akim').innerText = "Akım: " + parseFloat(d.uretim_amper).toFixed(2) + "A";
+                    document.getElementById('yagmur').innerText = "Yağış: " + (d.yagis_durumu ? "VAR 🌧️" : "YOK ☀️");
+                    document.getElementById('durum').style.color = (d.durum === "ARIZA") ? "#e74c3c" : "#2ecc71";
+                }
+            } catch (err) {
+                console.error("Hata Detayı:", err);
             }
-
         }
 
-        
-
-        setInterval(fetchVeri, 2000);
-
-        fetchVeri();
-
+        setInterval(veriGetir, 3000);
+        veriGetir();
     </script>
-
 </body>
-
 </html>
-
