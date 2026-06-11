@@ -2,31 +2,36 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>☀️ İzleme</title>
+    <title>Güneş Enerjisi İzleme</title>
     <style>
-        body { font-family: sans-serif; text-align: center; background: #eee; padding: 50px; }
-        .card { background: white; padding: 30px; display: inline-block; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        body { font-family: 'Segoe UI', sans-serif; text-align: center; background: #2c3e50; color: white; padding: 50px; }
+        .card { background: #34495e; padding: 30px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); display: inline-block; }
+        .data-box { font-size: 1.5em; margin: 15px; padding: 10px; border-bottom: 1px solid #7f8c8d; }
     </style>
 </head>
 <body>
     <div class="card">
-        <h2 id="durum">Yükleniyor...</h2>
-        <div id="veriler"></div>
+        <h1 id="durum">Yükleniyor...</h1>
+        <div class="data-box" id="isik">Işık: --</div>
+        <div class="data-box" id="akim">Akım: --</div>
+        <div class="data-box" id="yagmur">Yağış: --</div>
     </div>
     <script>
         const SB_URL = "https://fpksboxxaxyyinvttamp.supabase.co/rest/v1/panel_verileri?select=*&order=id.desc&limit=1";
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZwa3Nib3h4YXh5eWludnR0YW1wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNDk5OTUsImV4cCI6MjA5MDcyNTk5NX0.PRYzjXN8NEFSjee7X9vAgjb1APcKZ2DfH2MGnVgFP4w";
-
+        const SB_KEY = "BURAYA_ANON_KEYINI_YAZ"; // KEY'ini unutma!
+        
         async function fetchVeri() {
             try {
                 const res = await fetch(SB_URL, { headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY }});
                 const data = await res.json();
                 const d = data[0];
                 document.getElementById('durum').innerText = "Durum: " + d.durum;
-                document.getElementById('veriler').innerHTML = `<h3>Işık: %${d.isik_seviyesi} | Akım: ${d.uretim_amper}A</h3>`;
-            } catch(e) { document.getElementById('durum').innerText = "Hata!"; }
+                document.getElementById('isik').innerText = "Işık: %" + d.isik_seviyesi;
+                document.getElementById('akim').innerText = "Akım: " + d.uretim_amper.toFixed(2) + "A";
+                document.getElementById('yagmur').innerText = "Yağış: " + (d.yagis_durumu ? "VAR 🌧️" : "YOK ☀️");
+            } catch(e) { console.log("Hata:", e); }
         }
-        setInterval(fetchVeri, 3000);
+        setInterval(fetchVeri, 2000); // 2 saniyede bir tazeleyecek
         fetchVeri();
     </script>
 </body>
