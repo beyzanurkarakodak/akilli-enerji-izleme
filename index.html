@@ -38,7 +38,7 @@
     }
 
     // Arayüzü güncelleyen fonksiyon
-    function updateUI(last) {
+   function updateUI(last) {
         const isNormal = last.durum.includes("NORMAL");
         document.getElementById('title').innerText = "Güncel Panel Durumu";
         document.getElementById('content').innerHTML = `
@@ -46,11 +46,10 @@
             <div class="status ${isNormal ? 'NORMAL' : 'ARIZA'}">
                 ${isNormal ? '✅ SİSTEM NORMAL' : '⚠️ ARIZA TESPİTİ'}
             </div>
-            <p>Akım: <b>${last.uretim_amper}A</b></p>
+            <p>Akım: <b>${last.uretim_amper}A</b> | Yağış: <b>${last.yagis_durumu ? '🌧️ VAR' : '☀️ YOK'}</b></p>
         `;
         document.getElementById('mainCard').style.borderTopColor = isNormal ? "#2ecc71" : "#e74c3c";
     }
-
     // REALTIME: Veritabanında değişim olduğu an tetiklenir
     supabase.channel('public:panel_verileri')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'panel_verileri' }, payload => {
