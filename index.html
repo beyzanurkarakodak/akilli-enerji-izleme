@@ -2,62 +2,32 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>☀️ Akıllı Enerji İzleme</title>
+    <title>☀️ İzleme</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; text-align: center; background: #f8f9fa; padding: 40px; margin: 0; }
-        .card { background: white; padding: 40px; border-radius: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); display: inline-block; min-width: 320px; border-top: 12px solid #3498db; transition: 0.3s; }
-        .val { font-size: 3.5em; font-weight: 800; margin: 15px 0; color: #2c3e50; }
-        .status { font-size: 1.2em; font-weight: bold; padding: 10px 25px; border-radius: 50px; text-transform: uppercase; margin-bottom: 20px; }
-        .NORMAL { background: #d4edda; color: #155724; }
-        .ARIZA { background: #f8d7da; color: #721c24; }
-        h1 { color: #34495e; margin-bottom: 30px; }
-        .time { color: #95a5a6; margin-top: 20px; font-size: 0.9em; }
-        b { color: #2c3e50; }
+        body { font-family: sans-serif; text-align: center; background: #eee; padding: 50px; }
+        .card { background: white; padding: 30px; display: inline-block; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
-    <h1>☀️ Güneş Paneli Verimlilik Analizi</h1>
-    <div class="card" id="mainCard">
-        <h2 id="title">Veriler Çekiliyor...</h2>
-        <div id="content"></div>
-        <div id="time" class="time"></div>
+    <div class="card">
+        <h2 id="durum">Yükleniyor...</h2>
+        <div id="veriler"></div>
     </div>
+    <script>
+        const SB_URL = "https://fpksboxxaxyyinvttamp.supabase.co/rest/v1/panel_verileri?select=*&order=id.desc&limit=1";
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZwa3Nib3h4YXh5eWludnR0YW1wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNDk5OTUsImV4cCI6MjA5MDcyNTk5NX0.PRYzjXN8NEFSjee7X9vAgjb1APcKZ2DfH2MGnVgFP4w";
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-    const SB_URL = "https://fpksboxxaxyyinvttamp.supabase.co";
-    const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZwa3Nib3h4YXh5eWludnR0YW1wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNDk5OTUsImV4cCI6MjA5MDcyNTk5NX0.PRYzjXN8NEFSjee7X9vAgjb1APcKZ2DfH2MGnVgFP4w"; // KEY'ini unutma!
-    
-    const supabase = supabase.createClient(SB_URL, SB_KEY);
-
-    // Sayfa açıldığında ilk veriyi çek
-    async function getInitialData() {
-        const { data, error } = await supabase.from('panel_verileri').select('*').order('id', { ascending: false }).limit(1);
-        if (data) updateUI(data[0]);
-    }
-
-    // Arayüzü güncelleyen fonksiyon
-   function updateUI(last) {
-        const isNormal = last.durum.includes("NORMAL");
-        document.getElementById('title').innerText = "Güncel Panel Durumu";
-        document.getElementById('content').innerHTML = `
-            <div class="val">%${last.isik_seviyesi}</div>
-            <div class="status ${isNormal ? 'NORMAL' : 'ARIZA'}">
-                ${isNormal ? '✅ SİSTEM NORMAL' : '⚠️ ARIZA TESPİTİ'}
-            </div>
-            <p>Akım: <b>${last.uretim_amper}A</b> | Yağış: <b>${last.yagis_durumu ? '🌧️ VAR' : '☀️ YOK'}</b></p>
-        `;
-        document.getElementById('mainCard').style.borderTopColor = isNormal ? "#2ecc71" : "#e74c3c";
-    }
-    // REALTIME: Veritabanında değişim olduğu an tetiklenir
-    supabase.channel('public:panel_verileri')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'panel_verileri' }, payload => {
-        updateUI(payload.new); // Yeni veri gelir gelmez güncelle!
-      })
-      .subscribe();
-
-    getInitialData();
-</script>
+        async function fetchVeri() {
+            try {
+                const res = await fetch(SB_URL, { headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY }});
+                const data = await res.json();
+                const d = data[0];
+                document.getElementById('durum').innerText = "Durum: " + d.durum;
+                document.getElementById('veriler').innerHTML = `<h3>Işık: %${d.isik_seviyesi} | Akım: ${d.uretim_amper}A</h3>`;
+            } catch(e) { document.getElementById('durum').innerText = "Hata!"; }
+        }
+        setInterval(fetchVeri, 3000);
+        fetchVeri();
+    </script>
 </body>
 </html>
