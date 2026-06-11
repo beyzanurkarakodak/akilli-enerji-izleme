@@ -8,11 +8,12 @@
         body { font-family: 'Segoe UI', sans-serif; text-align: center; background: #f8f9fa; padding: 40px; margin: 0; }
         .card { background: white; padding: 40px; border-radius: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); display: inline-block; min-width: 320px; border-top: 12px solid #3498db; transition: 0.3s; }
         .val { font-size: 3.5em; font-weight: 800; margin: 15px 0; color: #2c3e50; }
-        .status { font-size: 1.4em; font-weight: bold; padding: 10px 25px; border-radius: 50px; text-transform: uppercase; }
+        .status { font-size: 1.2em; font-weight: bold; padding: 10px 25px; border-radius: 50px; text-transform: uppercase; margin-bottom: 20px; }
         .NORMAL { background: #d4edda; color: #155724; }
         .ARIZA { background: #f8d7da; color: #721c24; }
         h1 { color: #34495e; margin-bottom: 30px; }
         .time { color: #95a5a6; margin-top: 20px; font-size: 0.9em; }
+        b { color: #2c3e50; }
     </style>
 </head>
 <body>
@@ -24,7 +25,6 @@
     </div>
 
     <script>
-        // SENİN VERDİĞİN ANAHTARI VE URL'Yİ BURAYA YERLEŞTİRDİM
         const SB_URL = "https://fpksboxxaxyyinvttamp.supabase.co/rest/v1/panel_verileri?select=*&order=id.desc&limit=1";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZwa3Nib3h4YXh5eWludnR0YW1wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNDk5OTUsImV4cCI6MjA5MDcyNTk5NX0.PRYzjXN8NEFSjee7X9vAgjb1APcKZ2DfH2MGnVgFP4w";
 
@@ -50,7 +50,10 @@
                     <div class="status ${isNormal ? 'NORMAL' : 'ARIZA'}">
                         ${isNormal ? '✅ SİSTEM NORMAL' : '⚠️ ARIZA TESPİTİ'}
                     </div>
-                    <p style="margin-top:15px;">Akım Üretimi: <b>${last.uretim_amper}A</b></p>
+                    <p style="margin-top:15px;">
+                        Akım: <b>${last.uretim_amper}A</b> | 
+                        Yağış: <b>${last.yagis_durumu ? '🌧️ VAR' : '☀️ YOK'}</b>
+                    </p>
                 `;
                 document.getElementById('time').innerText = "Son Veri: " + new Date(last.created_at).toLocaleString('tr-TR');
                 document.getElementById('mainCard').style.borderTopColor = isNormal ? "#2ecc71" : "#e74c3c";
@@ -61,7 +64,7 @@
             }
         }
 
-        setInterval(update, 1000); // 5 saniyede bir güncelle
+        setInterval(update, 5000); // 5 saniyede bir güncelle
         update();
     </script>
 </body>
